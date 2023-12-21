@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connected Objects Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <header class="bg-dark text-white p-4 text-center">
+        <h1 class="display-4">Connected Objects Dashboard</h1>
+    </header>
+
+    <section class="mb-4">
+        <h2 class="mb-3">Connected Objects</h2>
+        <ul class="list-group">
+            <li class="list-group-item">
+                <strong>Serial Number:</strong> OBJ001<br>
+                <strong>Name:</strong> Smart Thermostat<br>
+                <strong>Sensor Type:</strong> Temperature<br>
+                <strong>User Association:</strong> Fedi Hmida
+            </li>
+            <li class="list-group-item">
+                <strong>Serial Number:</strong> OBJ002<br>
+                <strong>Name:</strong> Motion Sensor<br>
+                <strong>Sensor Type:</strong> Movement<br>
+                <strong>User Association:</strong> Fedi Hmida
+            </li>
+            <li class="list-group-item">
+                <strong>Serial Number:</strong> OBJ003<br>
+                <strong>Name:</strong> Weather Station<br>
+                <strong>Sensor Type:</strong> Temperature<br>
+                <strong>User Association:</strong> Khalil Bk
+            </li>
+            <!-- Add more connected objects as needed -->
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="mb-3">Add New Object</h2>
+        <form>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="serial-number">Serial Number</label>
+                    <input type="text" class="form-control" id="serial-number" name="serial-number" required>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="object-name">Object Name</label>
+                    <input type="text" class="form-control" id="object-name" name="object-name" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="sensor-type">Sensor Type</label>
+                    <select class="form-control" id="sensor-type" name="sensor-type" required>
+                        <option value="temperature">Temperature</option>
+                        <option value="movement">Movement</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="user-association">User Association</label>
+                    <input type="text" class="form-control" id="user-association" name="user-association" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-dark">Add Object</button>
+        </form>
+    </section>
+</div>
+    <script src="dashboard.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
