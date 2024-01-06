@@ -1,79 +1,106 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const admin = require('firebase-admin');
+const serviceAccount = require('./serviceAcountkey.json');
+const cors = require('cors');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+app.use(cors());
 
-// Remplacez 'YOUR_FIREBASE_CONFIG' par votre configuration Firebase.
-const firebaseConfig = {
-    apiKey: "AIzaSyDVJzUobDXduhtwK5WgQIuSWpRft5fnMfI",
-    authDomain: "dashbord-ede80.firebaseapp.com",
-    projectId: "dashbord-ede80",
-    storageBucket: "dashbord-ede80.appspot.com",
-    messagingSenderId: "1055939869534",
-    appId: "1:1055939869534:web:d1df40d471c9e14a026dcf",
-    measurementId: "G-JMKX4PH2JJ"
-   };
-   admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'dashbord-ede80',
-});
+try {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+  });
+  console.log('Firebase connection successful');
+} catch (error) {
+  console.error('Firebase initialization failed:', error);
+}
 
 const db = admin.firestore();
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-// Créer un utilisateur
-app.post('/SignUp', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await admin.auth().createUser({ email, password });
-      res.status(201).json({ uid: user.uid });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Erreur lors de la création de l\'utilisateur');
-    }
-  });
-  
-  // Connecter un utilisateur
-  app.post('/login', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await admin.auth().signInWithEmailAndPassword(email, password);
-      res.json({ uid: user.user.uid });
-    } catch (error) {
-      console.error(error);
-      res.status(401).send('Identifiants incorrects');
-    }
-  });
-  // Ajouter un objet
+
+app.post('/signUp', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await admin.auth().createUser({ email, password });
+    res.status(201).json({ id: user.uid });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Error while creating user: ' + error.message);
+  }
+});
+
 app.post('/index', async (req, res) => {
-    try {
-      const { uid, serialNumber, name, sensorType } = req.body;
-      const objectRef = db.collection('objects').doc(serialNumber);
-      await objectRef.set({ uid, serialNumber, name, sensorType });
-      res.status(201).send('Objet ajouté avec succès');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Erreur lors de l\'ajout de l\'objet');
+  try {
+    const { name, sensorType, serialNumber } = req.body;
+    const objectRef = await db.collection('objects').add({ name, sensorType, serialNumber });
+    res.status(201).send(`Object added successfully with ID: ${objectRef.id}`);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error while adding the object');
+  }
+});
+
+app.put('/updateObject/:id', async (req, res) => {
+  try {
+    const { name, sensorType } = req.body;
+    const objectId = req.params.id;
+    const objectRef = db.collection('objects').doc(objectId);
+    await objectRef.update({ name, sensorType });
+    res.send('Object updated successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error while updating the object');
+  }
+});
+
+app.get('/objects', async (req, res) => {
+  try {
+    const objectsSnapshot = await db.collection('objects').get();
+    const objects = [];
+
+    objectsSnapshot.forEach((doc) => {
+      objects.push({ id: doc.id, ...doc.data() });
+    });
+
+    res.json(objects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error while fetching objects');
+  }
+});
+
+app.get('/objects/:id', async (req, res) => {
+  try {
+    const objectId = req.params.id;
+    const objectDoc = await db.collection('objects').doc(objectId).get();
+
+    if (objectDoc.exists) {
+      res.json({ id: objectDoc.id, ...objectDoc.data() });
+    } else {
+      res.status(404).json({ error: 'Object not found' });
     }
-  });
-  
-  // Modifier un objet
-  app.put('/api/updateObject/:serialNumber', async (req, res) => {
-    try {
-      const { uid, name, sensorType } = req.body;
-      const serialNumber = req.params.serialNumber;
-      const objectRef = db.collection('objects').doc(serialNumber);
-      await objectRef.update({ uid, name, sensorType });
-      res.send('Objet mis à jour avec succès');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Erreur lors de la mise à jour de l\'objet');
-    }
-  });
-  
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error while fetching object');
+  }
+});
+
+app.delete('/objects/:id', async (req, res) => {
+  try {
+    const objectId = req.params.id;
+    await db.collection('objects').doc(objectId).delete();
+    res.json({ message: 'Object deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error while deleting the object');
+  }
+});
+
+module.exports = app;
